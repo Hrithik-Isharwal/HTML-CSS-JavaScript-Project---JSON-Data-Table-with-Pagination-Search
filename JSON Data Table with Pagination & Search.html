@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Data to Table - Pagination & Search</title>
+
+    <style>
+      #searchDiv {
+        display: flex;
+        justify-content: center;
+      }
+
+      #searchDiv label {
+        margin-right: 10px;
+      }
+
+      #searchDiv input {
+        width: 250px;
+      }
+
+      #pagination {
+        display: flex;
+        justify-content: center;
+      }
+
+      #pagination a {
+        text-decoration: none;
+        color: black;
+        padding: 8px 16px;
+      }
+
+      #pagination a:hover {
+        background-color: gray;
+        color: white;
+      }
+
+      .active {
+        background-color: rgb(129, 129, 229);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center">Pagination - JSON Data</h1>
+    <br />
+    <div id="searchDiv">
+      <label for="search">Search</label>
+      <input id="searchInput" type="text" onkeyup="search()" />
+    </div>
+    <br />
+    <br />
+    <table border="2" style="width: 80%; margin: auto">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Language</th>
+          <th>ID</th>
+          <th>Version</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <br />
+    <div id="pagination"></div>
+
+    <script>
+      let jsonData = fetch("JSONData.json");
+      jsonData
+        .then((value1) => {
+          return value1.json();
+        })
+        .then((data) => {
+          let pageDiv = document.getElementById("pagination");
+
+          let total = data.length;
+          let perpage = 10;
+          let totalPage = Math.ceil(total / perpage);
+          window.onload = paging(1, perpage);
+          let html = "";
+          var page;
+          var pageEnd;
+
+          html +=
+            '<a href="javascript:void(0)" id="prevBtn" onclick="prev(page)"> Prev </a>';
+          for (let i = 1; i <= totalPage; i++) {
+            html +=
+              '<a href="javascript:void(0)" class="items" onclick = "paging(' +
+              i +
+              "," +
+              totalPage +
+              ')">' +
+              i +
+              "</a>";
+          }
+          html +=
+            '<a href="javascript:void(0)" id="prevBtn" onclick="next(page, pageEnd)"> Next </a>';
+          pageDiv.innerHTML = html;
+        });
+
+      function paging(i, totalPage) {
+        let jsonData = fetch("JSONData.json");
+        jsonData
+          .then((value1) => {
+            return value1.json();
+          })
+          .then((data) => {
+            var headers = Object.keys(data[0]);
+
+            page = i;
+            pageEnd = totalPage;
+            currentPage(i - 1);
+
+            let a, b;
+            b = i * 10;
+            a = b - 10;
+
+            var dataRows = "";
+            for (var x = a; x < b; x++) {
+              dataRows += "<tr>";
+              for (var y = 0; y < headers.length; y++) {
+                var header = headers[y];
+                dataRows += "<td>" + data[x][header] + "</td>";
+              }
+              dataRows += "</tr>";
+            }
+
+            table = document.getElementById("tableBody");
+            table.innerHTML = dataRows;
+          });
+      }
+
+      function currentPage(page) {
+        let current = document.getElementsByClassName("items");
+        for (var i = 0; i < current.length; i++) {
+          current[page].classList.add("active");
+          current[i].classList.remove("active");
+        }
+      }
+
+      function prev(page) {
+        if (page == 1) {
+          console.log("Already on the first page");
+        } else {
+          page = page - 1;
+          paging(page);
+        }
+      }
+
+      function next(page, pageEnd) {
+        if (page == pageEnd) {
+          console.log("Already on the last page");
+        } else {
+          page = page + 1;
+          paging(page);
+        }
+      }
+
+      function search() {
+        let text = document.getElementById("searchInput").value.toLowerCase();
+
+        text = text ? text : "";
+
+        fetch("JSONData.json")
+          .then((value1) => value1.json())
+          .then(function (data) {
+            if (text != "") {
+              let results = data.filter((item) => {
+                if (item.name.toLowerCase().includes(text)) {
+                  return item;
+                }
+              });
+              data = results;
+              console.log(data);
+            }
+            let pageDiv = document.getElementById("pagination");
+            let total = data.length;
+            console.log(total);
+            let perpage = 10;
+            let totalPage = Math.ceil(total / perpage);
+            window.onload = paging(1, perpage);
+            let html = "";
+            var page;
+            var pageEnd;
+
+            html +=
+              '<a href="javascript:void(0)" id="prevBtn" onclick="prev(page)"> Prev </a>';
+            for (let i = 1; i <= totalPage; i++) {
+              html +=
+                '<a href="javascript:void(0)" class="items" onclick = "paging1(' +
+                i +
+                "," +
+                totalPage +
+                ')">' +
+                i +
+                "</a>";
+            }
+            html +=
+              '<a href="javascript:void(0)" id="prevBtn" onclick="next(page, pageEnd)"> Next </a>';
+            pageDiv.innerHTML = html;
+          });
+      }
+
+      function paging1(i, totalPage) {
+        let text = document.getElementById("searchInput").value.toLowerCase();
+
+        text = text ? text : "";
+
+        fetch("JSONData.json")
+          .then((value1) => value1.json())
+          .then(function (data) {
+            if (text != "") {
+              let results = data.filter((item) => {
+                if (item.name.toLowerCase().includes(text)) {
+                  return item;
+                }
+              });
+              data = results;
+              console.log(data);
+            }
+            var headers = Object.keys(data[0]);
+
+            page = i;
+            pageEnd = totalPage;
+            currentPage(i - 1); 
+
+            let a, b;
+            b = i * 10;
+            a = b - 10;
+
+            var dataRows = "";
+            for (var x = a; x < b; x++) {
+              dataRows += "<tr>";
+              for (var y = 0; y < headers.length; y++) {
+                var header = headers[y];
+                dataRows += "<td>" + data[x][header] + "</td>";
+              }
+              dataRows += "</tr>";
+            }
+
+            table = document.getElementById("tableBody");
+            table.innerHTML = dataRows;
+          });
+      }
+    </script>
+  </body>
+</html>
